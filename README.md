@@ -1,7 +1,7 @@
 
 # Face Emotional Analysis Microservices
 
-A microservices-based face emotion analysis system that detects faces, extracts facial landmarks, and estimates age and gender using Docker containers. The system uses Redis for data storage and gRPC for service communication, making it scalable and efficient for processing multiple images.
+A microservices-based face emotion analysis system that detects faces, extracts facial landmarks, and estimates age and gender(optional) using Docker containers. The system uses Redis for data storage and gRPC for service communication, making it scalable and efficient for processing multiple images.
 
 ## Table of Contents
 
