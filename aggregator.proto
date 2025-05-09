@@ -19,7 +19,7 @@ message FaceData {
     bytes face_image = 2; // Cropped face image
     BoundingBox bbox = 3; // Bounding box of the face
     FaceLandmarks landmarks = 4;
-    AgeGenderInfo age_gender = 5;
+    EmotionInfo emotion = 5;
 }
 
 message BoundingBox {
@@ -38,10 +38,10 @@ message Point {
     int32 y = 2;
 }
 
-message AgeGenderInfo {
-    int32 age = 1;
-    string gender = 2;
-    float confidence = 3;
+message EmotionInfo {
+    string emotion = 1; // Dominant emotion in Persian
+    float confidence = 2; // Confidence score
+    map<string, float> emotions = 3; // All detected emotions and their scores
 }
 
 message FaceResultResponse {

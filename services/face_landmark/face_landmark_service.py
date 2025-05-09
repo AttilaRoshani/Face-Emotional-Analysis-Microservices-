@@ -154,9 +154,33 @@ class FaceLandmarkService(aggregator_pb2_grpc.AggregatorServicer):
         processing_time = time.time() - start_time
         logger.info(f"Face landmark processing completed in {processing_time:.2f} seconds")
         
+        # Create response with landmarks
+        response_faces = []
+        for face in faces:
+            # Convert landmarks to flat list for gRPC
+            landmarks_flat = []
+            for point in face['landmarks']['all_points']:
+                landmarks_flat.extend(point)
+            
+            response_face = aggregator_pb2.FaceData(
+                face_id=face['face_id'],
+                face_image=face['face_image'].encode('utf-8'),
+                bbox=aggregator_pb2.BoundingBox(
+                    x=face['bbox']['x'],
+                    y=face['bbox']['y'],
+                    width=face['bbox']['width'],
+                    height=face['bbox']['height']
+                ),
+                landmarks=aggregator_pb2.LandmarkInfo(
+                    landmarks=landmarks_flat
+                )
+            )
+            response_faces.append(response_face)
+        
         return aggregator_pb2.FaceResultResponse(
             response=True,
-            message=f"Processed {len(faces)} faces"
+            message=f"Processed {len(faces)} faces",
+            faces=response_faces
         )
 
 def serve():

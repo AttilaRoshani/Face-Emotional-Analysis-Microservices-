@@ -46,10 +46,10 @@ class DataStorageService(aggregator_pb2_grpc.AggregatorServicer):
             landmarks_data = self.redis_client.get(landmarks_key)
             logger.info(f"Retrieved landmarks data: {landmarks_data}")
             
-            # Get age/gender data
-            age_gender_key = f"age_gender:{request.image_id}"
-            age_gender_data = self.redis_client.get(age_gender_key)
-            logger.info(f"Retrieved age/gender data: {age_gender_data}")
+            # Get emotion data
+            emotion_key = f"emotion:{request.image_id}"
+            emotion_data = self.redis_client.get(emotion_key)
+            logger.info(f"Retrieved emotion data: {emotion_data}")
 
             # Get original image filename from Redis
             image_filename_key = f"image_filename:{request.image_id}"
@@ -58,12 +58,12 @@ class DataStorageService(aggregator_pb2_grpc.AggregatorServicer):
                 original_filename = "unknown.jpg"  # Default if not found
 
             # If either data is missing, store what we have and return
-            if not landmarks_data or not age_gender_data:
+            if not landmarks_data or not emotion_data:
                 logger.warning(f"Missing data for image {request.image_id}")
                 if not landmarks_data:
                     logger.warning("No landmarks data found")
-                if not age_gender_data:
-                    logger.warning("No age/gender data found")
+                if not emotion_data:
+                    logger.warning("No emotion data found")
                 
                 # Store partial data if available
                 partial_data = []
@@ -77,12 +77,12 @@ class DataStorageService(aggregator_pb2_grpc.AggregatorServicer):
                             'bbox': landmark_item['bbox'],
                             'timestamp': request.time
                         })
-                elif age_gender_data:
-                    age_gender = json.loads(age_gender_data)
-                    for item in age_gender:
+                elif emotion_data:
+                    emotions = json.loads(emotion_data)
+                    for item in emotions:
                         partial_data.append({
                             'face_id': item['face_id'],
-                            'age_gender': item['age_gender'],
+                            'emotion_data': item['emotion_data'],
                             'timestamp': request.time
                         })
 
@@ -115,26 +115,26 @@ class DataStorageService(aggregator_pb2_grpc.AggregatorServicer):
 
             # Combine all data
             landmarks = json.loads(landmarks_data)
-            age_gender = json.loads(age_gender_data)
+            emotions = json.loads(emotion_data)
 
-            # Create a map of face_id to age/gender data
-            age_gender_map = {item['face_id']: item['age_gender'] for item in age_gender}
+            # Create a map of face_id to emotion data
+            emotion_map = {item['face_id']: item['emotion_data'] for item in emotions}
 
             # Combine data for each face
             combined_data = []
             for landmark_item in landmarks:
                 face_id = landmark_item['face_id']
-                if face_id in age_gender_map:
+                if face_id in emotion_map:
                     combined_data.append({
                         'face_id': face_id,
                         'landmarks': landmark_item['landmarks'],
                         'face_image': landmark_item['face_image'],
                         'bbox': landmark_item['bbox'],
-                        'age_gender': age_gender_map[face_id],
+                        'emotion_data': emotion_map[face_id],
                         'timestamp': request.time
                     })
                 else:
-                    # If age/gender data is missing for this face, still include the landmark data
+                    # If emotion data is missing for this face, still include the landmark data
                     combined_data.append({
                         'face_id': face_id,
                         'landmarks': landmark_item['landmarks'],
@@ -143,13 +143,13 @@ class DataStorageService(aggregator_pb2_grpc.AggregatorServicer):
                         'timestamp': request.time
                     })
 
-            # Add any faces that only have age/gender data
-            for item in age_gender:
+            # Add any faces that only have emotion data
+            for item in emotions:
                 face_id = item['face_id']
                 if not any(face['face_id'] == face_id for face in combined_data):
                     combined_data.append({
                         'face_id': face_id,
-                        'age_gender': item['age_gender'],
+                        'emotion_data': item['emotion_data'],
                         'timestamp': request.time
                     })
 

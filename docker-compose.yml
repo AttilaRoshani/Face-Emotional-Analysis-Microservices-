@@ -1,6 +1,18 @@
-version: '3.8'
+version: '3'
 
 services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./storage:/app/storage
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
   redis:
     image: redis:latest
     ports:
@@ -60,6 +72,19 @@ services:
       - data_storage
     networks:
       - face_detection_network
+
+  realtime:
+    build: .
+    volumes:
+      - ./storage:/app/storage
+      - /dev/video0:/dev/video0  # برای دسترسی به وبکم
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - api
+      - redis
+    command: python app/services/realtime_analysis.py
 
 networks:
   face_detection_network:

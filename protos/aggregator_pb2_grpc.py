@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from . import aggregator_pb2 as aggregator__pb2
+from protos import aggregator_pb2 as protos_dot_aggregator__pb2
 
 
 class AggregatorStub(object):
@@ -15,9 +15,9 @@ class AggregatorStub(object):
             channel: A grpc.Channel.
         """
         self.SaveFaceAttributes = channel.unary_unary(
-                '/ai.Aggregator/SaveFaceAttributes',
-                request_serializer=aggregator__pb2.FaceResult.SerializeToString,
-                response_deserializer=aggregator__pb2.FaceResultResponse.FromString,
+                '/aggregator.Aggregator/SaveFaceAttributes',
+                request_serializer=protos_dot_aggregator__pb2.FaceResult.SerializeToString,
+                response_deserializer=protos_dot_aggregator__pb2.FaceResultResponse.FromString,
                 )
 
 
@@ -35,12 +35,12 @@ def add_AggregatorServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'SaveFaceAttributes': grpc.unary_unary_rpc_method_handler(
                     servicer.SaveFaceAttributes,
-                    request_deserializer=aggregator__pb2.FaceResult.FromString,
-                    response_serializer=aggregator__pb2.FaceResultResponse.SerializeToString,
+                    request_deserializer=protos_dot_aggregator__pb2.FaceResult.FromString,
+                    response_serializer=protos_dot_aggregator__pb2.FaceResultResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'ai.Aggregator', rpc_method_handlers)
+            'aggregator.Aggregator', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -59,8 +59,8 @@ class Aggregator(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ai.Aggregator/SaveFaceAttributes',
-            aggregator__pb2.FaceResult.SerializeToString,
-            aggregator__pb2.FaceResultResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/aggregator.Aggregator/SaveFaceAttributes',
+            protos_dot_aggregator__pb2.FaceResult.SerializeToString,
+            protos_dot_aggregator__pb2.FaceResultResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
